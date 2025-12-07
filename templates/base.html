@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <title>{% block title %}Crochet Shop{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm sticky-top">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="{% url 'shop:home' %}">
+                <span class="text-primary-green">Crochet</span><span class="text-primary-yellow">Shop</span>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'shop:home' %}">Home</a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="categoriesDropdown" role="button" data-bs-toggle="dropdown">
+                            Categories
+                        </a>
+                        <ul class="dropdown-menu">
+                            {% for cat in all_categories %}
+                            <li><a class="dropdown-item" href="{% url 'shop:category' cat.slug %}">{{ cat.name }}</a></li>
+                            {% empty %}
+                            <li><a class="dropdown-item" href="{% url 'shop:product_list' %}">All Products</a></li>
+                            {% endfor %}
+                        </ul>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'shop:product_list' %}">All Products</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'orders:track_order' %}">Track Order</a>
+                    </li>
+                </ul>
+                <form class="d-flex me-3" action="{% url 'shop:search' %}" method="GET">
+                    <input class="form-control me-2" type="search" name="q" placeholder="Search products..." aria-label="Search">
+                    <button class="btn btn-outline-success" type="submit"><i class="bi bi-search"></i></button>
+                </form>
+                <a href="{% url 'shop:cart' %}" class="btn btn-primary-yellow position-relative">
+                    <i class="bi bi-cart3"></i> Cart
+                    {% if cart_count > 0 %}
+                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                        {{ cart_count }}
+                    </span>
+                    {% endif %}
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    {% if messages %}
+    <div class="container mt-3">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="bg-dark text-white py-5 mt-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4 mb-4">
+                    <h5 class="text-primary-yellow">CrochetShop</h5>
+                    <p>Beautiful handmade crochet items crafted with love. Each piece is unique and made with care.</p>
+                </div>
+                <div class="col-md-4 mb-4">
+                    <h5 class="text-primary-yellow">Quick Links</h5>
+                    <ul class="list-unstyled">
+                        <li><a href="{% url 'shop:home' %}" class="text-white text-decoration-none">Home</a></li>
+                        <li><a href="{% url 'shop:product_list' %}" class="text-white text-decoration-none">Products</a></li>
+                        <li><a href="{% url 'orders:track_order' %}" class="text-white text-decoration-none">Track Order</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-4 mb-4">
+                    <h5 class="text-primary-yellow">Contact Us</h5>
+                    <ul class="list-unstyled">
+                        <li><i class="bi bi-envelope me-2"></i> info@crochetshop.com</li>
+                        <li><i class="bi bi-phone me-2"></i> +254 700 000 000</li>
+                        <li><i class="bi bi-geo-alt me-2"></i> Nairobi, Kenya</li>
+                    </ul>
+                </div>
+            </div>
+            <hr class="my-4">
+            <div class="text-center">
+                <p class="mb-0">&copy; 2025 CrochetShop. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    {% load static %}
+    <script src="{% static 'js/main.js' %}"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

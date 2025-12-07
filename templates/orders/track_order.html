@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Track Your Order - CrochetShop{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="bg-white rounded-3 shadow-sm p-5">
+                <div class="text-center mb-4">
+                    <div class="bg-primary-green text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px;">
+                        <i class="bi bi-search fs-1"></i>
+                    </div>
+                    <h2>Track Your Order</h2>
+                    <p class="text-muted">Enter your order code to check the status</p>
+                </div>
+                
+                <form method="post" action="{% url 'orders:track_order' %}">
+                    {% csrf_token %}
+                    <div class="mb-4">
+                        <label for="order_code" class="form-label">Order Code</label>
+                        <input type="text" class="form-control form-control-lg text-center" id="order_code" name="order_code" placeholder="e.g., CR-2025-0001" required style="text-transform: uppercase; letter-spacing: 2px;">
+                    </div>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary-green btn-lg">
+                            <i class="bi bi-search"></i> Track Order
+                        </button>
+                    </div>
+                </form>
+                
+                <div class="text-center mt-4">
+                    <small class="text-muted">
+                        You can find your order code in the confirmation message you received after placing your order.
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

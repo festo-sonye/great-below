@@ -1,0 +1,135 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Order {{ order.order_code }} Status - CrochetShop{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="bg-white rounded-3 shadow-sm p-4 mb-4">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div>
+                        <h4 class="mb-1">Order {{ order.order_code }}</h4>
+                        <small class="text-muted">Placed on {{ order.created_at|date:"F d, Y" }}</small>
+                    </div>
+                    <span class="badge badge-status badge-{{ order.status }} fs-6">
+                        {{ order.get_status_display }}
+                    </span>
+                </div>
+                
+                <div class="order-tracking">
+                    <div class="tracking-progress">
+                        <div class="progress-line" style="width: {{ order.get_status_progress }}%;"></div>
+                        
+                        <div class="tracking-step {% if order.status == 'pending' or order.status == 'processing' or order.status == 'packed' or order.status == 'on_the_way' or order.status == 'delivered' %}{% if order.status == 'pending' %}active{% else %}completed{% endif %}{% endif %}">
+                            <div class="step-icon">
+                                <i class="bi bi-receipt"></i>
+                            </div>
+                            <div class="step-label">Pending</div>
+                        </div>
+                        
+                        <div class="tracking-step {% if order.status == 'processing' or order.status == 'packed' or order.status == 'on_the_way' or order.status == 'delivered' %}{% if order.status == 'processing' %}active{% else %}completed{% endif %}{% endif %}">
+                            <div class="step-icon">
+                                <i class="bi bi-gear"></i>
+                            </div>
+                            <div class="step-label">Processing</div>
+                        </div>
+                        
+                        <div class="tracking-step {% if order.status == 'packed' or order.status == 'on_the_way' or order.status == 'delivered' %}{% if order.status == 'packed' %}active{% else %}completed{% endif %}{% endif %}">
+                            <div class="step-icon">
+                                <i class="bi bi-box-seam"></i>
+                            </div>
+                            <div class="step-label">Packed</div>
+                        </div>
+                        
+                        <div class="tracking-step {% if order.status == 'on_the_way' or order.status == 'delivered' %}{% if order.status == 'on_the_way' %}active{% else %}completed{% endif %}{% endif %}">
+                            <div class="step-icon">
+                                <i class="bi bi-truck"></i>
+                            </div>
+                            <div class="step-label">On the Way</div>
+                        </div>
+                        
+                        <div class="tracking-step {% if order.status == 'delivered' %}active{% endif %}">
+                            <div class="step-icon">
+                                <i class="bi bi-check-circle"></i>
+                            </div>
+                            <div class="step-label">Delivered</div>
+                        </div>
+                    </div>
+                </div>
+                
+                {% if order.status == 'cancelled' %}
+                <div class="alert alert-danger mt-4">
+                    <i class="bi bi-x-circle"></i> This order has been cancelled.
+                </div>
+                {% endif %}
+            </div>
+            
+            <div class="row">
+                <div class="col-md-6 mb-4">
+                    <div class="bg-white rounded-3 shadow-sm p-4 h-100">
+                        <h5 class="mb-3"><i class="bi bi-person"></i> Customer Details</h5>
+                        <p class="mb-2"><strong>{{ order.customer_name }}</strong></p>
+                        <p class="mb-2"><i class="bi bi-phone"></i> {{ order.customer_phone }}</p>
+                        {% if order.customer_email %}
+                        <p class="mb-2"><i class="bi bi-envelope"></i> {{ order.customer_email }}</p>
+                        {% endif %}
+                        <p class="mb-0"><i class="bi bi-geo-alt"></i> {{ order.customer_address }}</p>
+                    </div>
+                </div>
+                
+                <div class="col-md-6 mb-4">
+                    <div class="bg-white rounded-3 shadow-sm p-4 h-100">
+                        <h5 class="mb-3"><i class="bi bi-bag"></i> Order Summary</h5>
+                        {% for item in order.items.all %}
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>{{ item.product_name }} x {{ item.quantity }}</span>
+                            <span>KES {{ item.subtotal }}</span>
+                        </div>
+                        {% endfor %}
+                        <hr>
+                        <div class="d-flex justify-content-between">
+                            <strong>Total</strong>
+                            <strong class="text-primary-green">KES {{ order.total_amount }}</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            {% if status_history %}
+            <div class="bg-white rounded-3 shadow-sm p-4">
+                <h5 class="mb-3"><i class="bi bi-clock-history"></i> Status History</h5>
+                <div class="timeline">
+                    {% for history in status_history %}
+                    <div class="d-flex mb-3">
+                        <div class="me-3">
+                            <div class="bg-primary-green text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                                <i class="bi bi-check"></i>
+                            </div>
+                        </div>
+                        <div>
+                            <strong>{{ history.status|title }}</strong>
+                            <p class="text-muted mb-0 small">{{ history.created_at|date:"M d, Y h:i A" }}</p>
+                            {% if history.note %}
+                            <p class="mb-0 small">{{ history.note }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+            
+            <div class="text-center mt-4">
+                <a href="{% url 'orders:track_order' %}" class="btn btn-outline-secondary me-2">
+                    <i class="bi bi-search"></i> Track Another Order
+                </a>
+                <a href="{% url 'shop:home' %}" class="btn btn-primary-yellow">
+                    Continue Shopping
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,171 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}CrochetShop - Handmade Crochet Items{% endblock %}
+
+{% block content %}
+<section class="hero-section">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <h1 class="display-4 fw-bold mb-4">
+                    Beautiful <span class="highlight">Handmade</span> Crochet Items
+                </h1>
+                <p class="lead mb-4">
+                    Discover unique, handcrafted crochet products made with love. From cozy sweaters to adorable dolls, find the perfect piece for you or your loved ones.
+                </p>
+                <a href="{% url 'shop:product_list' %}" class="btn btn-primary-yellow btn-lg me-3">
+                    Shop Now <i class="bi bi-arrow-right"></i>
+                </a>
+                <a href="{% url 'orders:track_order' %}" class="btn btn-outline-light btn-lg">
+                    Track Order
+                </a>
+            </div>
+            <div class="col-lg-6 text-center mt-4 mt-lg-0">
+                <div class="placeholder-image rounded-circle mx-auto" style="width: 350px; height: 350px;">
+                    <i class="bi bi-basket3"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% if categories %}
+<section class="py-5">
+    <div class="container">
+        <h2 class="section-title">Shop by Category</h2>
+        <div class="row g-4 mt-3">
+            {% for cat in categories %}
+            <div class="col-md-4 col-lg-2">
+                <a href="{% url 'shop:category' cat.slug %}" class="text-decoration-none">
+                    <div class="category-card shadow">
+                        {% if cat.image %}
+                        <img src="{{ cat.image.url }}" alt="{{ cat.name }}">
+                        {% else %}
+                        <div class="placeholder-image h-100">
+                            <i class="bi bi-collection"></i>
+                        </div>
+                        {% endif %}
+                        <div class="overlay">
+                            <h5>{{ cat.name }}</h5>
+                        </div>
+                    </div>
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+
+{% if featured_products %}
+<section class="py-5 bg-light">
+    <div class="container">
+        <h2 class="section-title">Featured Products</h2>
+        <div class="row g-4 mt-3">
+            {% for product in featured_products %}
+            <div class="col-sm-6 col-lg-3">
+                <div class="card product-card h-100">
+                    <a href="{{ product.get_absolute_url }}">
+                        {% if product.image %}
+                        <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.name }}">
+                        {% else %}
+                        <div class="card-img-top placeholder-image" style="height: 250px;">
+                            <i class="bi bi-image"></i>
+                        </div>
+                        {% endif %}
+                    </a>
+                    <div class="card-body">
+                        <a href="{{ product.get_absolute_url }}" class="text-decoration-none">
+                            <h5 class="product-name">{{ product.name }}</h5>
+                        </a>
+                        <p class="product-price mb-2">KES {{ product.price }}</p>
+                        {% if product.in_stock %}
+                        <span class="badge bg-success">In Stock</span>
+                        {% else %}
+                        <span class="badge bg-secondary">Out of Stock</span>
+                        {% endif %}
+                    </div>
+                    <div class="card-footer bg-white border-0 pb-3">
+                        <form action="{% url 'shop:add_to_cart' product.id %}" method="post" class="add-to-cart-form" data-ajax="true">
+                            {% csrf_token %}
+                            <input type="hidden" name="quantity" value="1">
+                            <button type="submit" class="btn btn-primary-green w-100" {% if not product.in_stock %}disabled{% endif %}>
+                                <i class="bi bi-cart-plus"></i> Add to Cart
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+
+{% if new_arrivals %}
+<section class="py-5">
+    <div class="container">
+        <h2 class="section-title">New Arrivals</h2>
+        <div class="row g-4 mt-3">
+            {% for product in new_arrivals %}
+            <div class="col-sm-6 col-lg-3">
+                <div class="card product-card h-100">
+                    <a href="{{ product.get_absolute_url }}">
+                        {% if product.image %}
+                        <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.name }}">
+                        {% else %}
+                        <div class="card-img-top placeholder-image" style="height: 250px;">
+                            <i class="bi bi-image"></i>
+                        </div>
+                        {% endif %}
+                    </a>
+                    <div class="card-body">
+                        <a href="{{ product.get_absolute_url }}" class="text-decoration-none">
+                            <h5 class="product-name">{{ product.name }}</h5>
+                        </a>
+                        <p class="product-price mb-2">KES {{ product.price }}</p>
+                        {% if product.in_stock %}
+                        <span class="badge bg-success">In Stock</span>
+                        {% else %}
+                        <span class="badge bg-secondary">Out of Stock</span>
+                        {% endif %}
+                    </div>
+                    <div class="card-footer bg-white border-0 pb-3">
+                        <form action="{% url 'shop:add_to_cart' product.id %}" method="post" class="add-to-cart-form" data-ajax="true">
+                            {% csrf_token %}
+                            <input type="hidden" name="quantity" value="1">
+                            <button type="submit" class="btn btn-primary-green w-100" {% if not product.in_stock %}disabled{% endif %}>
+                                <i class="bi bi-cart-plus"></i> Add to Cart
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        <div class="text-center mt-4">
+            <a href="{% url 'shop:product_list' %}" class="btn btn-primary-yellow btn-lg">
+                View All Products <i class="bi bi-arrow-right"></i>
+            </a>
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<section class="py-5 bg-primary-green text-white">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-8">
+                <h3 class="mb-3">Track Your Order</h3>
+                <p class="mb-0">Already placed an order? Track its status in real-time using your order code.</p>
+            </div>
+            <div class="col-lg-4 text-lg-end mt-3 mt-lg-0">
+                <a href="{% url 'orders:track_order' %}" class="btn btn-primary-yellow btn-lg">
+                    <i class="bi bi-search"></i> Track Now
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

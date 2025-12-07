@@ -1,0 +1,131 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ product.name }} - CrochetShop{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'shop:home' %}">Home</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'shop:category' product.category.slug %}">{{ product.category.name }}</a></li>
+            <li class="breadcrumb-item active">{{ product.name }}</li>
+        </ol>
+    </nav>
+    
+    <div class="row">
+        <div class="col-lg-6 mb-4">
+            {% if product.image %}
+            <img src="{{ product.image.url }}" alt="{{ product.name }}" class="main-product-image" id="mainImage">
+            {% else %}
+            <div class="main-product-image placeholder-image">
+                <i class="bi bi-image"></i>
+            </div>
+            {% endif %}
+            
+            {% if product.images.all %}
+            <div class="product-gallery">
+                {% if product.image %}
+                <img src="{{ product.image.url }}" alt="{{ product.name }}" class="thumbnail active">
+                {% endif %}
+                {% for img in product.images.all %}
+                <img src="{{ img.image.url }}" alt="{{ img.alt_text }}" class="thumbnail">
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+        
+        <div class="col-lg-6">
+            <span class="badge bg-secondary mb-2">{{ product.category.name }}</span>
+            <h1 class="mb-3">{{ product.name }}</h1>
+            <p class="display-6 text-primary-green fw-bold mb-4">KES {{ product.price }}</p>
+            
+            <div class="mb-4">
+                {% if product.in_stock %}
+                <span class="badge bg-success fs-6"><i class="bi bi-check-circle"></i> In Stock ({{ product.stock }} available)</span>
+                {% else %}
+                <span class="badge bg-danger fs-6"><i class="bi bi-x-circle"></i> Out of Stock</span>
+                {% endif %}
+            </div>
+            
+            <div class="mb-4">
+                <h5>Description</h5>
+                <p>{{ product.description }}</p>
+            </div>
+            
+            <form action="{% url 'shop:add_to_cart' product.id %}" method="post" class="add-to-cart-form">
+                {% csrf_token %}
+                
+                {% if product.get_colors_list %}
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Color</label>
+                    <select name="color" class="form-select">
+                        {% for color in product.get_colors_list %}
+                        <option value="{{ color }}">{{ color }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                {% endif %}
+                
+                {% if product.get_sizes_list %}
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Size</label>
+                    <select name="size" class="form-select">
+                        {% for size in product.get_sizes_list %}
+                        <option value="{{ size }}">{{ size }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                {% endif %}
+                
+                <div class="mb-4">
+                    <label class="form-label fw-bold">Quantity</label>
+                    <div class="quantity-control">
+                        <button type="button" class="qty-minus"><i class="bi bi-dash"></i></button>
+                        <input type="number" name="quantity" value="1" min="1" max="{{ product.stock }}">
+                        <button type="button" class="qty-plus"><i class="bi bi-plus"></i></button>
+                    </div>
+                </div>
+                
+                <div class="d-grid gap-2">
+                    <button type="submit" class="btn btn-primary-green btn-lg" {% if not product.in_stock %}disabled{% endif %}>
+                        <i class="bi bi-cart-plus"></i> Add to Cart
+                    </button>
+                    <a href="{% url 'shop:cart' %}" class="btn btn-outline-secondary btn-lg">
+                        <i class="bi bi-cart3"></i> View Cart
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    {% if related_products %}
+    <section class="mt-5 pt-5 border-top">
+        <h3 class="section-title">Related Products</h3>
+        <div class="row g-4 mt-3">
+            {% for product in related_products %}
+            <div class="col-sm-6 col-lg-3">
+                <div class="card product-card h-100">
+                    <a href="{{ product.get_absolute_url }}">
+                        {% if product.image %}
+                        <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.name }}">
+                        {% else %}
+                        <div class="card-img-top placeholder-image" style="height: 200px;">
+                            <i class="bi bi-image"></i>
+                        </div>
+                        {% endif %}
+                    </a>
+                    <div class="card-body">
+                        <a href="{{ product.get_absolute_url }}" class="text-decoration-none">
+                            <h5 class="product-name">{{ product.name }}</h5>
+                        </a>
+                        <p class="product-price">KES {{ product.price }}</p>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+</div>
+{% endblock %}

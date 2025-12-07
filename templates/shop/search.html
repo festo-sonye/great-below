@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Search: {{ query }} - CrochetShop{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="mb-4">
+        <h1 class="section-title">Search Results</h1>
+        {% if query %}
+        <p class="lead text-muted">Showing results for "{{ query }}"</p>
+        {% endif %}
+    </div>
+    
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <form method="GET" action="{% url 'shop:search' %}" class="d-flex">
+                <input type="text" name="q" class="form-control me-2" placeholder="Search products..." value="{{ query }}">
+                <button type="submit" class="btn btn-primary-green"><i class="bi bi-search"></i></button>
+            </form>
+        </div>
+    </div>
+    
+    {% if products %}
+    <p class="text-muted mb-4">{{ products.count }} products found</p>
+    <div class="row g-4">
+        {% for product in products %}
+        <div class="col-sm-6 col-lg-3">
+            <div class="card product-card h-100">
+                <a href="{{ product.get_absolute_url }}">
+                    {% if product.image %}
+                    <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.name }}">
+                    {% else %}
+                    <div class="card-img-top placeholder-image" style="height: 250px;">
+                        <i class="bi bi-image"></i>
+                    </div>
+                    {% endif %}
+                </a>
+                <div class="card-body">
+                    <span class="badge bg-secondary mb-2">{{ product.category.name }}</span>
+                    <a href="{{ product.get_absolute_url }}" class="text-decoration-none">
+                        <h5 class="product-name">{{ product.name }}</h5>
+                    </a>
+                    <p class="product-price mb-2">KES {{ product.price }}</p>
+                    {% if product.in_stock %}
+                    <span class="badge bg-success">In Stock</span>
+                    {% else %}
+                    <span class="badge bg-secondary">Out of Stock</span>
+                    {% endif %}
+                </div>
+                <div class="card-footer bg-white border-0 pb-3">
+                    <form action="{% url 'shop:add_to_cart' product.id %}" method="post" class="add-to-cart-form" data-ajax="true">
+                        {% csrf_token %}
+                        <input type="hidden" name="quantity" value="1">
+                        <button type="submit" class="btn btn-primary-green w-100" {% if not product.in_stock %}disabled{% endif %}>
+                            <i class="bi bi-cart-plus"></i> Add to Cart
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <i class="bi bi-search"></i>
+        <h4>No products found</h4>
+        <p class="text-muted">Try a different search term or browse our categories.</p>
+        <a href="{% url 'shop:product_list' %}" class="btn btn-primary-green">Browse All Products</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

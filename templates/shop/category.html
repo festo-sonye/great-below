@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ category.name }} - CrochetShop{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'shop:home' %}">Home</a></li>
+            <li class="breadcrumb-item active">{{ category.name }}</li>
+        </ol>
+    </nav>
+    
+    <div class="mb-4">
+        <h1 class="section-title">{{ category.name }}</h1>
+        {% if category.description %}
+        <p class="lead text-muted">{{ category.description }}</p>
+        {% endif %}
+    </div>
+    
+    {% if products %}
+    <div class="row g-4">
+        {% for product in products %}
+        <div class="col-sm-6 col-lg-3">
+            <div class="card product-card h-100">
+                <a href="{{ product.get_absolute_url }}">
+                    {% if product.image %}
+                    <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.name }}">
+                    {% else %}
+                    <div class="card-img-top placeholder-image" style="height: 250px;">
+                        <i class="bi bi-image"></i>
+                    </div>
+                    {% endif %}
+                </a>
+                <div class="card-body">
+                    <a href="{{ product.get_absolute_url }}" class="text-decoration-none">
+                        <h5 class="product-name">{{ product.name }}</h5>
+                    </a>
+                    <p class="product-price mb-2">KES {{ product.price }}</p>
+                    {% if product.in_stock %}
+                    <span class="badge bg-success">In Stock</span>
+                    {% else %}
+                    <span class="badge bg-secondary">Out of Stock</span>
+                    {% endif %}
+                </div>
+                <div class="card-footer bg-white border-0 pb-3">
+                    <form action="{% url 'shop:add_to_cart' product.id %}" method="post" class="add-to-cart-form" data-ajax="true">
+                        {% csrf_token %}
+                        <input type="hidden" name="quantity" value="1">
+                        <button type="submit" class="btn btn-primary-green w-100" {% if not product.in_stock %}disabled{% endif %}>
+                            <i class="bi bi-cart-plus"></i> Add to Cart
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <i class="bi bi-basket"></i>
+        <h4>No products in this category yet</h4>
+        <p class="text-muted">Check back soon for new items!</p>
+        <a href="{% url 'shop:product_list' %}" class="btn btn-primary-green">Browse All Products</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
