@@ -87,7 +87,7 @@
                         {% endif %}
                     </div>
                     <div class="card-footer bg-white border-0 pb-3">
-                        <form action="{% url 'shop:add_to_cart' product.id %}" method="post" class="add-to-cart-form" data-ajax="true">
+                        <form action="{% url 'shop:add_to_cart' product.id %}" method="post" class="add-to-cart-form">
                             {% csrf_token %}
                             <input type="hidden" name="quantity" value="1">
                             <button type="submit" class="btn btn-primary-green w-100" {% if not product.in_stock %}disabled{% endif %}>
@@ -132,7 +132,7 @@
                         {% endif %}
                     </div>
                     <div class="card-footer bg-white border-0 pb-3">
-                        <form action="{% url 'shop:add_to_cart' product.id %}" method="post" class="add-to-cart-form" data-ajax="true">
+                        <form action="{% url 'shop:add_to_cart' product.id %}" method="post" class="add-to-cart-form">
                             {% csrf_token %}
                             <input type="hidden" name="quantity" value="1">
                             <button type="submit" class="btn btn-primary-green w-100" {% if not product.in_stock %}disabled{% endif %}>

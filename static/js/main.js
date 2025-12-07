@@ -49,13 +49,20 @@ function updateCartItem(control) {
         fetch(form.action, {
             method: 'POST',
             body: formData,
+            credentials: 'same-origin',
             headers: {
                 'X-Requested-With': 'XMLHttpRequest'
             }
         })
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) {
+                form.submit();
+                return;
+            }
+            return response.json();
+        })
         .then(data => {
-            if (data.success) {
+            if (data && data.success) {
                 location.reload();
             }
         })
@@ -74,13 +81,20 @@ function initAddToCart() {
                 fetch(form.action, {
                     method: 'POST',
                     body: formData,
+                    credentials: 'same-origin',
                     headers: {
                         'X-Requested-With': 'XMLHttpRequest'
                     }
                 })
-                .then(response => response.json())
+                .then(response => {
+                    if (!response.ok) {
+                        form.submit();
+                        throw new Error('Response not OK');
+                    }
+                    return response.json();
+                })
                 .then(data => {
-                    if (data.success) {
+                    if (data && data.success) {
                         const cartBadge = document.querySelector('.btn-primary-yellow .badge');
                         if (cartBadge) {
                             cartBadge.textContent = data.cart_count;
