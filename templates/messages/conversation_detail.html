@@ -1,0 +1,89 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Chat - Great Below{% endblock %}
+
+{% block content %}
+<div class="container mt-5 mb-5">
+    <div class="row">
+        <!-- Back Button & Conversation Info -->
+        <div class="col-12 mb-3">
+            <a href="{% url 'messages:conversations_list' %}" class="btn btn-outline-secondary btn-sm">
+                <i class="bi bi-arrow-left"></i> Back to Conversations
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <div class="card border-0 shadow-sm">
+                <!-- Chat Header -->
+                <div class="card-header" style="background-color: #0A8500;">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 class="mb-0 text-white">
+                                <i class="bi bi-person-circle"></i> 
+                                {{ other_user.first_name|default:other_user.email }}
+                            </h5>
+                            {% if conversation.order %}
+                                <small class="text-white-50">Order #{{ conversation.order.order_code }}</small>
+                            {% endif %}
+                        </div>
+                        <div>
+                            <span class="badge bg-success">Online</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Messages Area -->
+                <div class="card-body" style="height: 500px; overflow-y: auto; background-color: #f8f9fa;">
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="mb-3 {% if message.sender == user %}text-end{% endif %}">
+                                <div class="d-inline-block p-3 rounded-lg" 
+                                     style="max-width: 70%; background-color: {% if message.sender == user %}#0A8500{% else %}white{% endif %}; border: 1px solid #ddd;">
+                                    <p class="mb-1" style="color: {% if message.sender == user %}white{% else %}#333{% endif %};">
+                                        {{ message.content }}
+                                    </p>
+                                    <small style="color: {% if message.sender == user %}rgba(255,255,255,0.7){% else %}#999{% endif %};">
+                                        {{ message.created_at|date:"M d, h:i A" }}
+                                    </small>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="text-center text-muted py-5">
+                            <p>No messages yet. Start the conversation!</p>
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Message Input -->
+                <div class="card-footer" style="background-color: #fff;">
+                    <form method="post" class="d-flex gap-2">
+                        {% csrf_token %}
+                        <textarea name="content" 
+                                  class="form-control form-control-sm" 
+                                  placeholder="Type your message..." 
+                                  rows="2"
+                                  style="border-color: #0A8500;"></textarea>
+                        <button type="submit" class="btn btn-sm" style="background-color: #0A8500; color: white; height: fit-content;">
+                            <i class="bi bi-send"></i> Send
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Auto-scroll to bottom
+    document.addEventListener('DOMContentLoaded', function() {
+        const messagesArea = document.querySelector('.card-body');
+        if (messagesArea) {
+            messagesArea.scrollTop = messagesArea.scrollHeight;
+        }
+    });
+</script>
+{% endblock %}

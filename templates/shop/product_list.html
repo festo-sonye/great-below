@@ -74,6 +74,15 @@
                                 <h5 class="product-name">{{ product.name }}</h5>
                             </a>
                             <p class="product-price mb-2">KES {{ product.price }}</p>
+                            
+                            <!-- Seller Info -->
+                            <small class="text-muted d-block mb-2">
+                                <i class="bi bi-shop"></i>
+                                <a href="{% url 'accounts:seller_profile' product.seller.id %}" class="text-muted text-decoration-none">
+                                    {{ product.seller.first_name|default:product.seller.email }}
+                                </a>
+                            </small>
+                            
                             {% if product.in_stock %}
                             <span class="badge bg-success">In Stock</span>
                             {% else %}

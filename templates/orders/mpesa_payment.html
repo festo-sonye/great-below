@@ -1,0 +1,237 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}M-PESA Payment - CrochetShop{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-6">
+            <div class="bg-white rounded-3 shadow-lg p-5 text-center">
+                <div class="mb-4">
+                    <i class="bi bi-phone-vibrate" style="font-size: 4rem; color: #0A8500;"></i>
+                </div>
+                
+                <h2 class="mb-3">M-PESA Payment</h2>
+                <p class="text-muted mb-4">You will receive an M-PESA prompt on your phone</p>
+                
+                <div class="alert alert-info mb-4" style="background-color: #e8f4f8; border-color: #0A8500;">
+                    <p class="mb-2"><strong>Order Code:</strong> {{ order.order_code }}</p>
+                    <p class="mb-2"><strong>Phone Number:</strong> {{ phone_number }}</p>
+                    <p class="mb-0"><strong>Amount to Pay:</strong> <span style="font-size: 1.5rem; color: #0A8500;">KES {{ deposit_amount|floatformat:0 }}</span></p>
+                </div>
+                
+                <div class="card mb-4 border-warning" style="border-left: 5px solid #FFD700;">
+                    <div class="card-body">
+                        <h5 class="card-title mb-3">What happens next:</h5>
+                        <ol class="text-start">
+                            <li class="mb-2">You will receive an M-PESA prompt on <strong>{{ phone_number }}</strong></li>
+                            <li class="mb-2">Enter your <strong>M-PESA PIN</strong> to confirm the payment</li>
+                            <li class="mb-2">You will receive a confirmation message</li>
+                            <li>Your order will be confirmed once payment is received</li>
+                        </ol>
+                    </div>
+                </div>
+                
+                <div class="mb-4">
+                    <div id="mpesa-status" class="spinner-border text-success" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p class="mt-3 text-muted"><small>Waiting for M-PESA prompt...</small></p>
+                </div>
+                
+                <div class="d-grid gap-2 mb-3">
+                    <button type="button" class="btn btn-success btn-lg" id="verifyPaymentBtn" disabled>
+                        <i class="bi bi-check-circle"></i> Verify Payment
+                    </button>
+                </div>
+                
+                <div class="d-grid gap-2 mb-3">
+                    <button type="button" class="btn btn-outline-success" id="confirmPaymentBtn" disabled>
+                        <i class="bi bi-arrow-right"></i> Continue to Order
+                    </button>
+                </div>
+                
+                <div class="d-grid gap-2">
+                    <a href="{% url 'shop:checkout' %}" class="btn btn-outline-secondary">
+                        <i class="bi bi-arrow-left"></i> Back to Checkout
+                    </a>
+                </div>
+                
+                <hr class="my-4">
+                
+                <div class="alert alert-light" style="background-color: #f0f0f0;">
+                    <h6 class="mb-3"><i class="bi bi-info-circle"></i> Payment Tips</h6>
+                    <ul class="text-start small mb-0">
+                        <li>Ensure you have sufficient M-PESA balance</li>
+                        <li>The prompt will appear within 30 seconds</li>
+                        <li>If you don't receive a prompt, check your phone number and try again</li>
+                        <li>Contact support if you experience any issues: <strong>+254 7XX XXX XXX</strong></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let pollCount = 0;
+    const maxPolls = 30; // Poll for up to 5 minutes (10 second intervals)
+    const pollInterval = 10000; // 10 seconds
+    let paymentVerified = false;
+    
+    // Auto-initiate payment on page load
+    window.addEventListener('load', function() {
+        const statusDiv = document.getElementById('mpesa-status');
+        const statusText = document.querySelector('.mt-3.text-muted');
+        
+        // Show that M-PESA prompt has been sent
+        statusText.innerHTML = '<strong style="color: #0A8500;">✓ M-PESA prompt sent to {{ phone_number }}</strong>';
+        statusDiv.innerHTML = '<div class="alert alert-success mt-3"><i class="bi bi-check-circle"></i> Payment prompt has been sent to your phone. Please check for the M-PESA pop-up and enter your PIN.</div>';
+        
+        // Enable verify button after 3 seconds (user can click to check manually)
+        setTimeout(function() {
+            document.getElementById('verifyPaymentBtn').disabled = false;
+            document.getElementById('verifyPaymentBtn').innerHTML = '<i class="bi bi-search"></i> Verify Payment';
+        }, 3000);
+        
+        // Start polling for payment status after 5 seconds (auto-check)
+        setTimeout(function() {
+            startPaymentStatusPolling();
+        }, 5000);
+    });
+    
+    function startPaymentStatusPolling() {
+        console.log('Starting payment status polling...');
+        
+        const checkPaymentStatus = function() {
+            if (paymentVerified) {
+                console.log('Payment already verified, stopping polling');
+                return;
+            }
+            
+            const orderCode = '{{ order.order_code }}';
+            const statusDiv = document.getElementById('mpesa-status');
+            
+            // Make API call to check payment status
+            fetch(`/orders/api/check-payment-status/${orderCode}/`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Payment status response:', data);
+                
+                if (data.success && data.payment_status === 'completed') {
+                    // Payment successful!
+                    paymentVerified = true;
+                    updatePaymentConfirmed(statusDiv, orderCode);
+                } else if (pollCount < maxPolls) {
+                    // Payment still pending, continue polling
+                    pollCount++;
+                    console.log(`Poll ${pollCount}/${maxPolls}: Payment still pending...`);
+                    setTimeout(checkPaymentStatus, pollInterval);
+                } else {
+                    // Max polls reached
+                    statusDiv.innerHTML = `
+                        <div class="alert alert-warning mt-3">
+                            <i class="bi bi-exclamation-triangle"></i>
+                            <strong>Payment Verification Timeout</strong>
+                            <p class="mt-2 mb-0">We couldn't auto-verify your payment. Click "Verify Payment" button to manually check.</p>
+                        </div>
+                    `;
+                }
+            })
+            .catch(error => {
+                console.error('Error checking payment status:', error);
+                if (pollCount < maxPolls) {
+                    pollCount++;
+                    setTimeout(checkPaymentStatus, pollInterval);
+                }
+            });
+        };
+        
+        // Start the polling
+        checkPaymentStatus();
+    }
+    
+    function updatePaymentConfirmed(statusDiv, orderCode) {
+        statusDiv.innerHTML = `
+            <div class="alert alert-success mt-3">
+                <i class="bi bi-check-circle"></i> 
+                <strong>Payment Confirmed!</strong>
+                <p class="mt-2 mb-0">Your payment has been successfully received. Redirecting to order confirmation...</p>
+            </div>
+        `;
+        
+        // Update button states
+        document.getElementById('verifyPaymentBtn').disabled = true;
+        document.getElementById('confirmPaymentBtn').disabled = false;
+        document.getElementById('confirmPaymentBtn').innerHTML = '<i class="bi bi-check-circle"></i> Proceed to Order';
+        
+        // Auto-redirect after 2 seconds
+        setTimeout(function() {
+            window.location.href = `/orders/track/${orderCode}/`;
+        }, 2000);
+    }
+    
+    // Handle verify payment button click
+    document.getElementById('verifyPaymentBtn').addEventListener('click', function() {
+        const orderCode = '{{ order.order_code }}';
+        const statusDiv = document.getElementById('mpesa-status');
+        
+        // Show loading state
+        this.disabled = true;
+        this.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Checking payment status...';
+        
+        // Manually check payment status
+        fetch(`/orders/api/check-payment-status/${orderCode}/`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log('Manual payment status check:', data);
+            
+            if (data.success && data.payment_status === 'completed') {
+                // Payment confirmed!
+                paymentVerified = true;
+                updatePaymentConfirmed(statusDiv, orderCode);
+            } else {
+                // Payment still pending
+                document.getElementById('verifyPaymentBtn').disabled = false;
+                document.getElementById('verifyPaymentBtn').innerHTML = '<i class="bi bi-search"></i> Verify Payment';
+                statusDiv.innerHTML = `
+                    <div class="alert alert-info mt-3">
+                        <i class="bi bi-hourglass-split"></i>
+                        <strong>Payment Still Pending</strong>
+                        <p class="mt-2 mb-0">We haven't received payment confirmation yet. Make sure you completed the M-PESA payment and try again.</p>
+                    </div>
+                `;
+            }
+        })
+        .catch(error => {
+            console.error('Error verifying payment:', error);
+            document.getElementById('verifyPaymentBtn').disabled = false;
+            document.getElementById('verifyPaymentBtn').innerHTML = '<i class="bi bi-search"></i> Verify Payment';
+            statusDiv.innerHTML = `
+                <div class="alert alert-danger mt-3">
+                    <i class="bi bi-exclamation-triangle"></i>
+                    <strong>Error Checking Payment</strong>
+                    <p class="mt-2 mb-0">An error occurred while checking payment status. Please try again.</p>
+                </div>
+            `;
+        });
+    });
+    
+    // Handle continue to order button click
+    document.getElementById('confirmPaymentBtn').addEventListener('click', function() {
+        const orderCode = '{{ order.order_code }}';
+        window.location.href = `/orders/track/${orderCode}/`;
+    });
+</script>
+{% endblock %}

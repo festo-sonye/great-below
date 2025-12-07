@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Order, OrderItem, OrderStatusHistory
+from .models import Order, OrderItem, OrderStatusHistory, DeliveryConfirmation, Notification
 
 
 class OrderItemInline(admin.TabularInline):
@@ -47,6 +47,21 @@ class OrderAdmin(admin.ModelAdmin):
             )
         super().save_model(request, obj, form, change)
 
+
+@admin.register(DeliveryConfirmation)
+class DeliveryConfirmationAdmin(admin.ModelAdmin):
+    list_display = ['order', 'customer_confirmed', 'confirmed_at']
+    list_filter = ['customer_confirmed', 'confirmed_at']
+    search_fields = ['order__order_code']
+    readonly_fields = ['confirmed_at']
+
+
+@admin.register(Notification)
+class NotificationAdmin(admin.ModelAdmin):
+    list_display = ['title', 'user', 'notification_type', 'is_read', 'created_at']
+    list_filter = ['notification_type', 'is_read', 'created_at']
+    search_fields = ['title', 'message', 'user__email']
+    readonly_fields = ['created_at']
 
 @admin.register(OrderItem)
 class OrderItemAdmin(admin.ModelAdmin):

@@ -49,7 +49,7 @@
                     <input class="form-control me-2" type="search" name="q" placeholder="Search products..." aria-label="Search">
                     <button class="btn btn-outline-success" type="submit"><i class="bi bi-search"></i></button>
                 </form>
-                <a href="{% url 'shop:cart' %}" class="btn btn-primary-yellow position-relative">
+                <a href="{% url 'shop:cart' %}" class="btn btn-primary-yellow position-relative me-2">
                     <i class="bi bi-cart3"></i> Cart
                     {% if cart_count > 0 %}
                     <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
@@ -57,6 +57,50 @@
                     </span>
                     {% endif %}
                 </a>
+
+                <!-- Notifications Bell -->
+                {% if user.is_authenticated %}
+                    <a href="#" class="btn btn-outline-info position-relative me-2" data-bs-toggle="modal" data-bs-target="#notificationsModal">
+                        <i class="bi bi-bell"></i> 
+                        {% if unread_notifications_count > 0 %}
+                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" id="notif-count">
+                            {{ unread_notifications_count }}
+                        </span>
+                        {% endif %}
+                    </a>
+                {% endif %}
+
+                <!-- User Authentication Menu -->
+                {% if user.is_authenticated %}
+                    <div class="btn-group" role="group">
+                        <button id="userDropdown" type="button" class="btn btn-success dropdown-toggle" data-bs-toggle="dropdown" style="background-color: #0A8500;">
+                            <i class="bi bi-person-circle"></i> {{ user.first_name|default:user.email }}
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                            <li><a class="dropdown-item" href="{% url 'accounts:profile' %}"><i class="bi bi-person me-2"></i>My Profile</a></li>
+                            <li><a class="dropdown-item" href="{% url 'chat:conversations_list' %}"><i class="bi bi-chat-dots me-2"></i>Messages</a></li>
+                            {% if user.is_customer %}
+                                <li><a class="dropdown-item" href="{% url 'accounts:customer_dashboard' %}"><i class="bi bi-box-seam me-2"></i>My Orders</a></li>
+                            {% endif %}
+                            {% if user.is_seller %}
+                                <li><a class="dropdown-item" href="{% url 'accounts:seller_dashboard' %}"><i class="bi bi-shop me-2"></i>My Shop</a></li>
+                            {% endif %}
+                            {% if user.user_type == 'admin' %}
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="{% url 'accounts:admin_dashboard' %}"><i class="bi bi-speedometer2 me-2"></i>Admin Dashboard</a></li>
+                            {% endif %}
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="{% url 'accounts:logout' %}"><i class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
+                        </ul>
+                    </div>
+                {% else %}
+                    <a href="{% url 'accounts:login' %}" class="btn btn-success me-2" style="background-color: #0A8500;">
+                        <i class="bi bi-box-arrow-in-right"></i> Login
+                    </a>
+                    <a href="{% url 'accounts:register' %}" class="btn btn-warning">
+                        <i class="bi bi-person-plus"></i> Sign Up
+                    </a>
+                {% endif %}
             </div>
         </div>
     </nav>
@@ -111,5 +155,50 @@
     {% load static %}
     <script src="{% static 'js/main.js' %}"></script>
     {% block extra_js %}{% endblock %}
-</body>
-</html>
+
+    <!-- Notifications Modal -->
+    {% if user.is_authenticated %}
+    <div class="modal fade" id="notificationsModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header" style="background-color: #FFD700; border-bottom: 3px solid #0A8500;">
+                    <h5 class="modal-title" style="color: #0A8500;">
+                        <i class="bi bi-bell"></i> Notifications
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" style="max-height: 400px; overflow-y: auto;">
+                    {% if user.notifications.all %}
+                        {% for notif in user.notifications.all|dictsort:"-created_at"|slice:":10" %}
+                        <div class="notification-item mb-3 pb-3 border-bottom" style="{% if not notif.is_read %}background-color: #f0f0f0; border-left: 4px solid #FFD700;{% endif %}padding-left: 10px;">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div class="flex-grow-1">
+                                    <h6 class="mb-1" style="color: #0A8500;">
+                                        <span class="badge" style="background-color: #FFD700; color: #0A8500;">{{ notif.get_notification_type_display }}</span>
+                                    </h6>
+                                    <h6 class="mb-1">{{ notif.title }}</h6>
+                                    <p class="mb-2 text-muted small">{{ notif.message|truncatewords:20 }}</p>
+                                    <small class="text-muted">
+                                        <i class="bi bi-clock"></i> {{ notif.created_at|timesince }} ago
+                                    </small>
+                                </div>
+                                {% if not notif.is_read %}
+                                <span class="badge bg-success ms-2">New</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="alert alert-info mb-0">
+                            <i class="bi bi-info-circle"></i> No notifications yet.
+                        </div>
+                    {% endif %}
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+

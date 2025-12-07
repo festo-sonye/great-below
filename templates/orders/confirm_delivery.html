@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+
+{% block title %}Confirm Delivery - {{ order.order_code }}{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header" style="background-color: #0A8500;">
+                    <h4 class="mb-0 text-white">
+                        <i class="bi bi-check-circle"></i> Confirm Delivery
+                    </h4>
+                </div>
+                <div class="card-body p-5">
+                    <div class="alert alert-info mb-4">
+                        <i class="bi bi-info-circle"></i>
+                        <strong>Order {{ order.order_code }}</strong> has been marked as delivered. 
+                        Please confirm that you have received your items.
+                    </div>
+                    
+                    <div class="mb-4">
+                        <h6>Items in this order:</h6>
+                        <ul class="list-unstyled">
+                            {% for item in order.items.all %}
+                                <li class="mb-2">
+                                    <strong>{{ item.product_name }}</strong>
+                                    <span class="badge bg-success">x{{ item.quantity }}</span>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <div class="mb-4">
+                            <label class="form-label">Confirm Receipt of Items</label>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="confirmCheck" required>
+                                <label class="form-check-label" for="confirmCheck">
+                                    I confirm that I have received all items in good condition
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label for="confirmNote" class="form-label">Additional Notes (Optional)</label>
+                            <textarea class="form-control" id="confirmNote" name="confirmation_note" rows="3" placeholder="Any comments about the delivery or items..."></textarea>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-success w-100" style="background-color: #0A8500;">
+                            <i class="bi bi-check"></i> Confirm Delivery
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

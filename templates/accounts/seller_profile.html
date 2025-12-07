@@ -1,0 +1,206 @@
+{% extends 'base.html' %}
+{% load custom_filters %}
+
+{% block title %}{{ seller.first_name }}'s Shop - {{ seller_profile.shop_name }}{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <!-- Seller Info Card -->
+    <div class="row mb-5">
+        <div class="col-lg-8 mx-auto">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-5">
+                    <div class="row">
+                        <div class="col-md-3 text-center">
+                            {% if seller_profile.shop_image %}
+                                <img src="{{ seller_profile.shop_image.url }}" alt="{{ seller_profile.shop_name }}" class="rounded-circle" style="width: 150px; height: 150px; object-fit: cover; border: 4px solid #FFD700;">
+                            {% else %}
+                                <div class="rounded-circle" style="width: 150px; height: 150px; background-color: #FFD700; display: flex; align-items: center; justify-content: center; margin: 0 auto;">
+                                    <i class="bi bi-shop" style="font-size: 4rem; color: #0A8500;"></i>
+                                </div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-9">
+                            <h2 class="mb-2" style="color: #0A8500;">{{ seller_profile.shop_name }}</h2>
+                            <p class="text-muted mb-3">{{ seller_profile.shop_description }}</p>
+                            
+                            <!-- Rating Section -->
+                            <div class="mb-3">
+                                <div style="font-size: 1.8rem;">
+                                    {% if avg_rating|floatformat:0 == '5' %}★★★★★{% endif %}
+                                    {% if avg_rating|floatformat:0 == '4' %}★★★★☆{% endif %}
+                                    {% if avg_rating|floatformat:0 == '3' %}★★★☆☆{% endif %}
+                                    {% if avg_rating|floatformat:0 == '2' %}★★☆☆☆{% endif %}
+                                    {% if avg_rating|floatformat:0 == '1' %}★☆☆☆☆{% endif %}
+                                    {% if avg_rating|floatformat:0 == '0' %}☆☆☆☆☆{% endif %}
+                                    <span class="ms-2" style="font-size: 1rem; color: #0A8500;">{{ avg_rating|floatformat:1 }}/5</span>
+                                </div>
+                                <small class="text-muted">Based on {{ review_count }} review{{ review_count|pluralize }}</small>
+                            </div>
+                            
+                            <!-- Contact Info -->
+                            <div class="row mt-4">
+                                <div class="col-md-6">
+                                    {% if seller_profile.phone_number %}
+                                        <p class="mb-2"><i class="bi bi-telephone" style="color: #0A8500;"></i> <strong>{{ seller_profile.phone_number }}</strong></p>
+                                    {% endif %}
+                                    {% if seller_profile.shop_address %}
+                                        <p class="mb-2"><i class="bi bi-geo-alt" style="color: #0A8500;"></i> {{ seller_profile.shop_address }}</p>
+                                    {% endif %}
+                                </div>
+                                <div class="col-md-6">
+                                    {% if seller_profile.is_verified %}
+                                        <p class="text-success"><i class="bi bi-check-circle-fill"></i> <strong>Verified Seller</strong></p>
+                                    {% endif %}
+                                    <p class="text-muted"><small>{{ product_count }} product{{ product_count|pluralize }} listed</small></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Rating Breakdown -->
+    {% if review_count > 0 %}
+    <div class="row mb-5">
+        <div class="col-lg-8 mx-auto">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header" style="background-color: #FFD700; border-bottom: 3px solid #0A8500;">
+                    <h5 class="mb-0" style="color: #0A8500;">Rating Breakdown</h5>
+                </div>
+                <div class="card-body p-4">
+                    {% for rating in '54321'|make_list %}
+                        {% with count=star_counts|get_item:rating|default:0 %}
+                        <div class="mb-3">
+                            <div class="d-flex align-items-center">
+                                <span style="min-width: 40px; color: #FFD700;">
+                                    {% for i in 'x'|rjust:rating|make_list %}★{% endfor %}
+                                </span>
+                                <div class="progress flex-grow-1 ms-3" style="height: 20px;">
+                                    {% widthratio count review_count 100 as percentage %}
+                                    <div class="progress-bar" role="progressbar" style="width: {{ percentage }}%; background-color: #0A8500;" aria-valuenow="{{ percentage }}" aria-valuemin="0" aria-valuemax="100"></div>
+                                </div>
+                                <span class="ms-3" style="min-width: 60px; text-align: right;">{{ count }} ({{ percentage }}%)</span>
+                            </div>
+                        </div>
+                        {% endwith %}
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Reviews Section -->
+    <div class="row mb-5">
+        <div class="col-lg-8 mx-auto">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header" style="background-color: #FFD700; border-bottom: 3px solid #0A8500;">
+                    <h5 class="mb-0" style="color: #0A8500;">
+                        <i class="bi bi-chat-left-text"></i> Customer Reviews ({{ review_count }})
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if reviews %}
+                        {% for review in reviews %}
+                        <div class="mb-4 pb-4 border-bottom">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <div>
+                                    <h6 class="mb-1" style="color: #0A8500;">{{ review.customer.first_name|default:"Anonymous" }}</h6>
+                                    <div style="color: #FFD700; font-size: 1.1rem;">
+                                        {% if review.rating == 5 %}★★★★★{% endif %}
+                                        {% if review.rating == 4 %}★★★★☆{% endif %}
+                                        {% if review.rating == 3 %}★★★☆☆{% endif %}
+                                        {% if review.rating == 2 %}★★☆☆☆{% endif %}
+                                        {% if review.rating == 1 %}★☆☆☆☆{% endif %}
+                                        <span class="ms-2" style="color: #0A8500; font-size: 0.9rem;">{{ review.get_rating_display }}</span>
+                                    </div>
+                                </div>
+                                <small class="text-muted">{{ review.created_at|date:"M d, Y" }}</small>
+                            </div>
+                            
+                            {% if review.title %}
+                            <h6 class="mb-2">{{ review.title }}</h6>
+                            {% endif %}
+                            
+                            <p class="mb-0 text-muted">{{ review.comment }}</p>
+                            
+                            {% if review.is_verified_purchase %}
+                            <small class="text-success mt-2 d-inline-block"><i class="bi bi-check-circle-fill"></i> Verified Purchase</small>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="alert alert-info mb-0">
+                            <i class="bi bi-info-circle"></i> No reviews yet. Be the first to review this seller!
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Products Section -->
+    <div class="row mb-5">
+        <div class="col-lg-8 mx-auto">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header" style="background-color: #FFD700; border-bottom: 3px solid #0A8500;">
+                    <h5 class="mb-0" style="color: #0A8500;">
+                        <i class="bi bi-bag"></i> Products ({{ product_count }})
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if products %}
+                        <div class="row g-3">
+                            {% for product in products|slice:":6" %}
+                            <div class="col-md-4">
+                                <a href="{% url 'shop:product_detail' product.id %}" class="text-decoration-none">
+                                    <div class="card border-0 shadow-sm h-100 hover-shadow" style="transition: transform 0.2s;">
+                                        {% if product.image %}
+                                            <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.name }}" style="height: 200px; object-fit: cover;">
+                                        {% else %}
+                                            <div style="height: 200px; background-color: #f0f0f0; display: flex; align-items: center; justify-content: center;">
+                                                <i class="bi bi-image" style="font-size: 3rem; color: #ccc;"></i>
+                                            </div>
+                                        {% endif %}
+                                        <div class="card-body p-3">
+                                            <h6 class="card-title mb-2" style="color: #0A8500;">{{ product.name|truncatewords:5 }}</h6>
+                                            <p class="mb-2"><strong>KES {{ product.price|floatformat:0 }}</strong></p>
+                                            {% if product.stock > 0 %}
+                                                <small class="text-success">In Stock ({{ product.stock }})</small>
+                                            {% else %}
+                                                <small class="text-danger">Out of Stock</small>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </a>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% if product_count > 6 %}
+                        <div class="text-center mt-4">
+                            <a href="{% url 'shop:product_list' %}?seller={{ seller.id }}" class="btn btn-outline-success">
+                                View All {{ product_count }} Products
+                            </a>
+                        </div>
+                        {% endif %}
+                    {% else %}
+                        <div class="alert alert-info mb-0">
+                            <i class="bi bi-info-circle"></i> No products available at the moment.
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.hover-shadow:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+}
+</style>
+{% endblock %}

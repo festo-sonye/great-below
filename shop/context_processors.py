@@ -10,3 +10,18 @@ def cart_context(request):
 def categories_context(request):
     categories = Category.objects.all()
     return {'all_categories': categories}
+
+
+def notifications_context(request):
+    """Add user notifications to template context"""
+    if request.user.is_authenticated:
+        notifications = request.user.notifications.all().order_by('-created_at')[:10]
+        unread_count = request.user.notifications.filter(is_read=False).count()
+        return {
+            'user_notifications': notifications,
+            'unread_notifications_count': unread_count,
+        }
+    return {
+        'user_notifications': [],
+        'unread_notifications_count': 0,
+    }

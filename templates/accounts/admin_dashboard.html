@@ -1,0 +1,340 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Admin Dashboard - Great Below{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-lg-8">
+            <h1 class="section-title mb-2">
+                <i class="bi bi-speedometer2"></i> Admin Dashboard
+            </h1>
+            <p class="text-muted">Manage orders, sellers, products, and customer reviews</p>
+        </div>
+        <div class="col-lg-4 text-end">
+            <a href="{% url 'shop:home' %}" class="btn btn-outline-secondary">
+                <i class="bi bi-house"></i> Back to Home
+            </a>
+        </div>
+    </div>
+
+    <!-- Key Statistics -->
+    <div class="row mb-4">
+        <div class="col-md-3 mb-3">
+            <div class="card border-0 shadow-sm" style="border-left: 5px solid #FFD700;">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <p class="text-muted mb-2">Total Users</p>
+                            <h3 class="mb-0" style="color: #0A8500;">{{ total_users }}</h3>
+                        </div>
+                        <i class="bi bi-people fs-3 text-warning"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3 mb-3">
+            <div class="card border-0 shadow-sm" style="border-left: 5px solid #0A8500;">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <p class="text-muted mb-2">Total Sellers</p>
+                            <h3 class="mb-0" style="color: #0A8500;">{{ total_sellers }}</h3>
+                        </div>
+                        <i class="bi bi-shop fs-3" style="color: #0A8500;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3 mb-3">
+            <div class="card border-0 shadow-sm" style="border-left: 5px solid #FFD700;">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <p class="text-muted mb-2">Total Orders</p>
+                            <h3 class="mb-0" style="color: #0A8500;">{{ total_orders }}</h3>
+                        </div>
+                        <i class="bi bi-bag fs-3 text-warning"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3 mb-3">
+            <div class="card border-0 shadow-sm" style="border-left: 5px solid #0A8500;">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <p class="text-muted mb-2">Total Revenue</p>
+                            <h3 class="mb-0" style="color: #0A8500;">KES {{ total_revenue|floatformat:0 }}</h3>
+                        </div>
+                        <i class="bi bi-currency-dollar fs-3" style="color: #0A8500;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Secondary Statistics -->
+    <div class="row mb-4">
+        <div class="col-md-4 mb-3">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <p class="text-muted mb-2">Pending Orders</p>
+                            <h3 class="mb-0" style="color: #FFD700;">{{ pending_orders }}</h3>
+                        </div>
+                        <i class="bi bi-clock-history fs-3 text-warning"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4 mb-3">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <p class="text-muted mb-2">Total Products</p>
+                            <h3 class="mb-0" style="color: #0A8500;">{{ total_products }}</h3>
+                        </div>
+                        <i class="bi bi-box fs-3" style="color: #0A8500;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4 mb-3">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <p class="text-muted mb-2">Total Customers</p>
+                            <h3 class="mb-0" style="color: #0A8500;">{{ total_customers }}</h3>
+                        </div>
+                        <i class="bi bi-person-check fs-3" style="color: #0A8500;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Menu -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title mb-3"><i class="bi bi-list"></i> Management</h5>
+                    <div class="row">
+                        <div class="col-md-3 mb-2">
+                            <a href="{% url 'accounts:admin_orders' %}" class="btn btn-outline-dark w-100">
+                                <i class="bi bi-bag"></i> Manage Orders
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-2">
+                            <a href="{% url 'accounts:admin_sellers' %}" class="btn btn-outline-dark w-100">
+                                <i class="bi bi-shop"></i> Manage Sellers
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-2">
+                            <a href="{% url 'accounts:admin_products' %}" class="btn btn-outline-dark w-100">
+                                <i class="bi bi-box"></i> Manage Products
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-2">
+                            <a href="{% url 'accounts:admin_reviews' %}" class="btn btn-outline-dark w-100">
+                                <i class="bi bi-star"></i> Customer Reviews
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Orders & Low Stock Products -->
+    <div class="row">
+        <div class="col-lg-6 mb-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-bottom">
+                    <h5 class="mb-0"><i class="bi bi-clock-history"></i> Recent Orders</h5>
+                </div>
+                <div class="card-body p-0">
+                    {% if recent_orders %}
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Order Code</th>
+                                        <th>Customer</th>
+                                        <th>Amount</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for order in recent_orders %}
+                                        <tr>
+                                            <td><strong>{{ order.order_code }}</strong></td>
+                                            <td>{{ order.customer_name }}</td>
+                                            <td>KES {{ order.total_amount|floatformat:0 }}</td>
+                                            <td>
+                                                {% if order.status == 'pending' %}
+                                                    <span class="badge bg-warning">Pending</span>
+                                                {% elif order.status == 'payment_confirmed' %}
+                                                    <span class="badge bg-info">Payment Confirmed</span>
+                                                {% elif order.status == 'shipped' %}
+                                                    <span class="badge bg-info">Shipped</span>
+                                                {% elif order.status == 'delivered' %}
+                                                    <span class="badge bg-success">Delivered</span>
+                                                {% elif order.status == 'cancelled' %}
+                                                    <span class="badge bg-danger">Cancelled</span>
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="p-4 text-center text-muted">
+                            <i class="bi bi-inbox fs-3"></i>
+                            <p class="mt-2">No orders yet</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6 mb-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-bottom">
+                    <h5 class="mb-0"><i class="bi bi-exclamation-triangle"></i> Low Stock Products</h5>
+                </div>
+                <div class="card-body p-0">
+                    {% if low_stock_products %}
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Product</th>
+                                        <th>Stock</th>
+                                        <th>Price</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for product in low_stock_products %}
+                                        <tr>
+                                            <td>{{ product.name }}</td>
+                                            <td>
+                                                {% if product.stock < 2 %}
+                                                    <span class="badge bg-danger">{{ product.stock }}</span>
+                                                {% else %}
+                                                    <span class="badge bg-warning">{{ product.stock }}</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>KES {{ product.price|floatformat:0 }}</td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="p-4 text-center text-muted">
+                            <i class="bi bi-check-circle fs-3"></i>
+                            <p class="mt-2">All products have good stock</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Top Sellers & Recent Reviews -->
+    <div class="row">
+        <div class="col-lg-6 mb-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-bottom">
+                    <h5 class="mb-0"><i class="bi bi-star"></i> Top Sellers</h5>
+                </div>
+                <div class="card-body p-0">
+                    {% if top_sellers %}
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Seller</th>
+                                        <th>Rating</th>
+                                        <th>Reviews</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for seller in top_sellers %}
+                                        <tr>
+                                            <td>{{ seller.get_full_name }}</td>
+                                            <td>
+                                                {% if seller.avg_rating %}
+                                                    <span style="color: #FFD700;">{% for i in 'x'|rjust:seller.avg_rating|make_list %}⭐{% endfor %}</span>
+                                                    <small class="text-muted">({{ seller.avg_rating|floatformat:1 }})</small>
+                                                {% else %}
+                                                    <span class="text-muted">No ratings</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>{{ seller.review_count }}</td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="p-4 text-center text-muted">
+                            <i class="bi bi-shop fs-3"></i>
+                            <p class="mt-2">No sellers yet</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6 mb-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-bottom">
+                    <h5 class="mb-0"><i class="bi bi-chat-left-text"></i> Recent Reviews</h5>
+                </div>
+                <div class="card-body p-0">
+                    {% if recent_reviews %}
+                        <div style="max-height: 400px; overflow-y: auto;">
+                            {% for review in recent_reviews %}
+                                <div class="border-bottom p-3" style="border-bottom: 1px solid #e9ecef;">
+                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                        <div>
+                                            <strong>{{ review.seller.get_full_name }}</strong>
+                                            <div style="color: #FFD700; font-size: 0.9rem;">{{ review.rating_stars }}</div>
+                                        </div>
+                                        <small class="text-muted">{{ review.created_at|date:"M d, Y" }}</small>
+                                    </div>
+                                    {% if review.title %}
+                                        <p class="mb-1"><strong>{{ review.title }}</strong></p>
+                                    {% endif %}
+                                    {% if review.comment %}
+                                        <p class="mb-0 text-muted" style="font-size: 0.9rem;">{{ review.comment|truncatewords:15 }}</p>
+                                    {% endif %}
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="p-4 text-center text-muted">
+                            <i class="bi bi-chat-left-text fs-3"></i>
+                            <p class="mt-2">No reviews yet</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

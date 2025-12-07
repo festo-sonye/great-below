@@ -53,7 +53,41 @@
                 <p>{{ product.description }}</p>
             </div>
             
-            <form action="{% url 'shop:add_to_cart' product.id %}" method="post" class="add-to-cart-form">
+            <!-- Seller Information Section -->
+            <div class="mb-4 p-4 border rounded-3" style="background-color: #f9f9f9; border: 2px solid #FFD700 !important;">
+                <h5 class="mb-3" style="color: #0A8500;"><i class="bi bi-shop"></i> Sold by</h5>
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <h6 class="mb-1" style="color: #0A8500;">
+                            {{ product.seller.first_name|default:product.seller.email }}
+                            {% if product.seller.seller_profile.is_verified %}
+                            <span class="badge bg-success ms-2"><i class="bi bi-check-circle-fill"></i> Verified</span>
+                            {% endif %}
+                        </h6>
+                        {% if product.seller.seller_profile %}
+                        <p class="text-muted mb-2">{{ product.seller.seller_profile.shop_name }}</p>
+                        {% endif %}
+                        
+                        <!-- Seller Rating -->
+                        {% if seller_rating %}
+                        <div style="color: #FFD700; font-size: 1.1rem;">
+                            {% if seller_rating|floatformat:0 == '5' %}★★★★★{% endif %}
+                            {% if seller_rating|floatformat:0 == '4' %}★★★★☆{% endif %}
+                            {% if seller_rating|floatformat:0 == '3' %}★★★☆☆{% endif %}
+                            {% if seller_rating|floatformat:0 == '2' %}★★☆☆☆{% endif %}
+                            {% if seller_rating|floatformat:0 == '1' %}★☆☆☆☆{% endif %}
+                            <span style="color: #0A8500; margin-left: 8px; font-size: 0.95rem;">{{ seller_rating|floatformat:1 }}/5 ({{ review_count }} review{{ review_count|pluralize }})</span>
+                        </div>
+                        {% else %}
+                        <small class="text-muted"><i class="bi bi-star"></i> No ratings yet</small>
+                        {% endif %}
+                    </div>
+                    <a href="{% url 'accounts:seller_profile' product.seller.id %}" class="btn btn-sm btn-success" style="background-color: #0A8500;">
+                        <i class="bi bi-eye"></i> View Profile
+                    </a>
+                </div>
+            </div>
+
                 {% csrf_token %}
                 
                 {% if product.get_colors_list %}

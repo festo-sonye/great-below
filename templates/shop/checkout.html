@@ -7,8 +7,13 @@
 <div class="container py-5">
     <h1 class="section-title mb-4">Checkout</h1>
     
-    <form method="post" action="{% url 'shop:checkout' %}">
+    <form method="post" action="{% url 'shop:checkout' %}" id="checkoutForm">
         {% csrf_token %}
+        
+        <!-- Hidden fields for location data -->
+        <input type="hidden" name="customer_latitude" id="customer_latitude">
+        <input type="hidden" name="customer_longitude" id="customer_longitude">
+        
         <div class="row">
             <div class="col-lg-7">
                 <div class="bg-white rounded-3 shadow-sm p-4 mb-4">
@@ -16,17 +21,17 @@
                     
                     <div class="mb-3">
                         <label for="customer_name" class="form-label">Full Name *</label>
-                        <input type="text" class="form-control" id="customer_name" name="customer_name" required>
+                        <input type="text" class="form-control" id="customer_name" name="customer_name" value="{{ initial_data.customer_name }}" required>
                     </div>
                     
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label for="customer_phone" class="form-label">Phone Number *</label>
-                            <input type="tel" class="form-control" id="customer_phone" name="customer_phone" placeholder="+254 7XX XXX XXX" required>
+                            <input type="tel" class="form-control" id="customer_phone" name="customer_phone" placeholder="+254 7XX XXX XXX" value="{{ initial_data.customer_phone }}" required>
                         </div>
                         <div class="col-md-6 mb-3">
                             <label for="customer_email" class="form-label">Email (Optional)</label>
-                            <input type="email" class="form-control" id="customer_email" name="customer_email">
+                            <input type="email" class="form-control" id="customer_email" name="customer_email" value="{{ initial_data.customer_email }}">
                         </div>
                     </div>
                     
@@ -34,30 +39,53 @@
                         <label for="customer_address" class="form-label">Delivery Address *</label>
                         <textarea class="form-control" id="customer_address" name="customer_address" rows="3" placeholder="Enter your full delivery address including city/town" required></textarea>
                     </div>
+                    
+                    <!-- Location Section -->
+                    <div class="alert alert-info mt-4 mb-3" style="background-color: #e8f4f8; border-color: #0A8500;">
+                        <h5 class="mb-3"><i class="bi bi-geo-alt"></i> Share Your Location (Optional)</h5>
+                        <p class="mb-3 text-muted">Sharing your location helps us provide more accurate delivery times.</p>
+                        <button type="button" class="btn btn-sm btn-outline-primary" id="captureLocationBtn">
+                            <i class="bi bi-geo"></i> Capture My Location
+                        </button>
+                        <div id="locationStatus" class="mt-2"></div>
+                        <div id="locationDisplay" class="mt-2"></div>
+                    </div>
                 </div>
                 
                 <div class="bg-white rounded-3 shadow-sm p-4">
                     <h4 class="mb-4"><i class="bi bi-credit-card"></i> Payment Method</h4>
                     
+                    <div class="alert alert-warning mb-3" style="background-color: #FFD700; border-color: #0A8500;">
+                        <i class="bi bi-exclamation-triangle"></i> 
+                        <strong>20% Deposit Required:</strong> You must pay KES {{ deposit_amount|floatformat:0 }} (20% of your order) to confirm.
+                    </div>
+                    
                     <div class="form-check p-3 border rounded mb-3">
-                        <input class="form-check-input" type="radio" name="payment_method" id="cod" value="cod" checked>
+                        <input class="form-check-input" type="radio" name="payment_method" id="bank" value="bank_transfer" checked>
+                        <label class="form-check-label w-100" for="bank">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <strong>Bank Transfer</strong>
+                                    <p class="text-muted mb-0 small">Transfer KES {{ deposit_amount|floatformat:0 }} to our account</p>
+                                </div>
+                                <i class="bi bi-bank fs-4 text-primary"></i>
+                            </div>
+                        </label>
+                    </div>
+                    
+                    <div class="form-check p-3 border rounded">
+                        <input class="form-check-input" type="radio" name="payment_method" id="cod" value="cash">
                         <label class="form-check-label w-100" for="cod">
                             <div class="d-flex justify-content-between align-items-center">
                                 <div>
-                                    <strong>Cash on Delivery</strong>
-                                    <p class="text-muted mb-0 small">Pay when you receive your order</p>
+                                    <strong>Cash on Delivery (20% Deposit Required)</strong>
+                                    <p class="text-muted mb-0 small">Pay KES {{ deposit_amount|floatformat:0 }} deposit now, balance on delivery</p>
                                 </div>
                                 <i class="bi bi-cash-stack fs-4 text-primary-green"></i>
                             </div>
                         </label>
                     </div>
-                    
-                    <div class="alert alert-info">
-                        <i class="bi bi-info-circle"></i> 
-                        M-PESA payment option coming soon!
-                    </div>
                 </div>
-            </div>
             
             <div class="col-lg-5">
                 <div class="checkout-summary">
@@ -91,8 +119,19 @@
                     
                     <hr>
                     
+                    <div class="d-flex justify-content-between mb-2" style="background-color: #FFD700; padding: 10px; border-radius: 5px;">
+                        <span><strong>20% Deposit (Due Now)</strong></span>
+                        <span><strong>KES {{ deposit_amount|floatformat:0 }}</strong></span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-4" style="padding: 10px; background-color: #f0f0f0; border-radius: 5px;">
+                        <span><strong>80% Balance (Due on Delivery)</strong></span>
+                        <span><strong style="color: #0A8500;">KES {{ balance_amount|floatformat:0 }}</strong></span>
+                    </div>
+                    
+                    <hr>
+                    
                     <div class="d-flex justify-content-between mb-4">
-                        <span class="fs-5 fw-bold">Total</span>
+                        <span class="fs-5 fw-bold">Total Order Value</span>
                         <span class="fs-5 fw-bold text-primary-green">KES {{ total }}</span>
                     </div>
                     
@@ -111,4 +150,76 @@
         </div>
     </form>
 </div>
+
+<script>
+    // Geolocation capture functionality
+    document.getElementById('captureLocationBtn').addEventListener('click', function(e) {
+        e.preventDefault();
+        const statusDiv = document.getElementById('locationStatus');
+        const displayDiv = document.getElementById('locationDisplay');
+        
+        // Check if geolocation is supported
+        if (!navigator.geolocation) {
+            statusDiv.innerHTML = '<div class="alert alert-danger mt-2"><i class="bi bi-exclamation-triangle"></i> Geolocation is not supported by your browser</div>';
+            return;
+        }
+        
+        // Show loading status
+        statusDiv.innerHTML = '<div class="alert alert-info mt-2"><i class="bi bi-hourglass-split"></i> Requesting your location...</div>';
+        
+        // Get the user's current position
+        navigator.geolocation.getCurrentPosition(
+            function(position) {
+                // Success callback
+                const latitude = position.coords.latitude;
+                const longitude = position.coords.longitude;
+                const accuracy = position.coords.accuracy;
+                
+                // Store in hidden form fields
+                document.getElementById('customer_latitude').value = latitude;
+                document.getElementById('customer_longitude').value = longitude;
+                
+                // Display the location
+                statusDiv.innerHTML = '<div class="alert alert-success mt-2"><i class="bi bi-check-circle"></i> Location captured successfully!</div>';
+                displayDiv.innerHTML = `
+                    <div class="alert alert-light mt-2" style="background-color: #f0f0f0;">
+                        <p class="mb-1"><strong>Latitude:</strong> ${latitude.toFixed(6)}</p>
+                        <p class="mb-1"><strong>Longitude:</strong> ${longitude.toFixed(6)}</p>
+                        <p class="mb-0 small text-muted"><strong>Accuracy:</strong> ±${accuracy.toFixed(0)} meters</p>
+                    </div>
+                `;
+            },
+            function(error) {
+                // Error callback
+                let errorMsg = '';
+                switch(error.code) {
+                    case error.PERMISSION_DENIED:
+                        errorMsg = 'You denied permission to access your location. Please enable location services in your browser settings.';
+                        break;
+                    case error.POSITION_UNAVAILABLE:
+                        errorMsg = 'Location information is unavailable. Please check your internet connection.';
+                        break;
+                    case error.TIMEOUT:
+                        errorMsg = 'The location request timed out. Please try again.';
+                        break;
+                    default:
+                        errorMsg = 'An error occurred while getting your location.';
+                }
+                statusDiv.innerHTML = `<div class="alert alert-warning mt-2"><i class="bi bi-exclamation-triangle"></i> ${errorMsg}</div>`;
+            },
+            {
+                // Options for geolocation
+                enableHighAccuracy: true,
+                timeout: 10000,
+                maximumAge: 0
+            }
+        );
+    });
+    
+    // Auto-request location on page load (optional)
+    window.addEventListener('load', function() {
+        // Uncomment the line below to auto-request location when page loads
+        document.getElementById('captureLocationBtn').click();
+    });
+</script>
 {% endblock %}
