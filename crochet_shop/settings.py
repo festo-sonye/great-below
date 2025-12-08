@@ -1,5 +1,6 @@
 import os
 from pathlib import Path
+import dj_database_url
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -57,8 +58,6 @@ TEMPLATES = [
 WSGI_APPLICATION = 'crochet_shop.wsgi.application'
 
 # Database Configuration
-import dj_database_url
-
 DATABASES = {
     'default': dj_database_url.config(
         default='sqlite:///db.sqlite3',
